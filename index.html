@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chamber Events 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --accent-lr: #b07d1a;
+    --accent-nlr: #1a6aad;
+    --accent-con: #1a9e56;
+    --accent-mau: #ad1a55;
+    --text: #1a1814;
+    --muted: #888;
+    --reg: #c87a10;
+    --accent-eb: #7b3fa8;
+    --accent-shr: #e05c1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 32px 40px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 16px 40px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label { color: var(--muted); font-size: 12px; margin-right: 4px; }
+
+  .chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: #555; color: var(--text); }
+  .chip.active { color: #000; border-color: transparent; }
+  .chip[data-chamber="ALL"].active { background: var(--text); }
+  .chip[data-chamber="LR"].active { background: var(--accent-lr); }
+  .chip[data-chamber="NLR"].active { background: var(--accent-nlr); }
+  .chip[data-chamber="CON"].active { background: var(--accent-con); }
+  .chip[data-chamber="MAU"].active { background: var(--accent-mau); }
+  .chip[data-chamber="EB"].active { background: var(--accent-eb); }
+  .chip[data-chamber="SHR"].active { background: var(--accent-shr); }
+
+  .reg-filter {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toggle {
+    width: 36px; height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .toggle.on { background: var(--reg); }
+  #tbd-toggle.on { background: #c83a3a; }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: left 0.2s;
+  }
+  .toggle.on::after { left: 19px; }
+
+  .toggle-label { font-size: 12px; color: var(--muted); cursor: pointer; }
+
+  .stats {
+    padding: 10px 40px;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #event-count { color: var(--text); font-weight: 600; }
+
+  .table-wrap { padding: 0 40px 60px; overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: #f0ede7; }
+  tbody tr.hidden { display: none; }
+
+  td {
+    padding: 11px 12px;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  .chamber-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .chamber-LR .chamber-dot { background: var(--accent-lr); }
+  .chamber-NLR .chamber-dot { background: var(--accent-nlr); }
+  .chamber-CON .chamber-dot { background: var(--accent-con); }
+  .chamber-MAU .chamber-dot { background: var(--accent-mau); }
+  .chamber-EB .chamber-dot { background: var(--accent-eb); }
+  .chamber-SHR .chamber-dot { background: var(--accent-shr); }
+
+  .event-name { font-weight: 500; color: var(--text); }
+  .event-date { color: var(--muted); white-space: nowrap; }
+  .event-time { color: var(--muted); white-space: nowrap; font-size: 12px; }
+  .event-duration { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .event-location { color: var(--muted); font-size: 12px; max-width: 200px; }
+
+  .badge-reg {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(240,160,48,0.15);
+    border: 1px solid rgba(240,160,48,0.4);
+    border-radius: 10px;
+    color: var(--reg);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge-free {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(0,0,0,0.04);
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .cal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #eeebe4;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 11px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .cal-link:hover { background: #e4e0d8; border-color: #bbb; }
+
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    display: none;
+  }
+
+  .month-header td {
+    background: #eeebe4;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 0 40px 0;
+    margin-bottom: -4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chamber Events 2026</h1>
+  <p>Little Rock · North Little Rock · Conway · Sherwood · Maumelle &mdash; Updated May 20, 2026</p>
+</header>
+
+<div class="filters">
+  <span class="filter-label">CHAMBER</span>
+  <button class="chip active" data-chamber="ALL">All</button>
+  <button class="chip" data-chamber="LR">Little Rock</button>
+  <button class="chip" data-chamber="NLR">North Little Rock</button>
+  <button class="chip" data-chamber="CON">Conway</button>
+  <button class="chip" data-chamber="MAU">Maumelle</button>
+  <button class="chip" data-chamber="SHR">Sherwood</button>
+  <button class="chip" data-chamber="EB">Other</button>
+  <div class="reg-filter">
+    <div class="toggle" id="reg-toggle"></div>
+    <span class="toggle-label" id="reg-label">Registration Required Only</span>
+    <div class="toggle" id="tbd-toggle" style="margin-left:16px;"></div>
+    <span class="toggle-label" id="tbd-label">Needs Info Only</span>
+  </div>
+</div>
+
+<div class="stats">
+  Showing <span id="event-count">0</span> events
+</div>
+
+<div class="table-wrap">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-lr)"></div>Little Rock Regional</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-nlr)"></div>North Little Rock</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-con)"></div>Conway</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-mau)"></div>Maumelle</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-shr)"></div>Sherwood</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-eb)"></div>Other Sources</div>
+  </div>
+
+  <table id="events-table">
+    <thead>
+      <tr>
+        <th>Chamber</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Duration</th>
+        <th>Event</th>
+        <th>Location</th>
+        <th>Cost</th>
+        <th>Registration</th>
+        <th>Add to Calendar</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="no-results" id="no-results">No events match current filters.</div>
+</div>
+
+<script>
+function addToCalendar(btn) {
+  const title = btn.dataset.title;
+  const date = btn.dataset.date;
+  const startTime = btn.dataset.st;
+  const endTime = btn.dataset.et;
+  const location = btn.dataset.loc;
+  const chamber = btn.dataset.chamber;
+
+  // Map chamber to calendar per routing rules
+  const calendarMap = {
+    'LR': 'Little Rock Events',
+    'NLR': 'North Little Rock Events',
+    'CON': 'Conway Events',
+    'MAU': 'Maumelle',
+    'SHR': 'Optional Networking',
+    'EB':  'Optional Networking'
+  };
+  const targetCalendar = calendarMap[chamber] || 'Optional Networking';
+
+  // Format date and time for display
+  const d = new Date(date + 'T12:00:00');
+  const dateStr = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  const fmtT = (t) => {
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 || 12;
+    return hr + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+  };
+
+  const msg =
+`Add this event to my calendar. First check my "Calendar" (work) — if it's already there, stop. Otherwise check my "${targetCalendar}" calendar — if it's already there, stop. If it's on neither, add it to my "${targetCalendar}" calendar.
+
+Event: ${title}
+Date: ${dateStr}
+Time: ${fmtT(startTime)} – ${fmtT(endTime)}
+Location: ${location || 'TBD'}`;
+
+  if (typeof window.claude !== 'undefined' && window.claude.sendMessage) {
+    window.claude.sendMessage(msg);
+  } else if (typeof sendPrompt === 'function') {
+    sendPrompt(msg);
+  } else {
+    // Fallback: copy to clipboard so user can paste into chat
+    navigator.clipboard.writeText(msg).then(() => {
+      alert('Message copied. Paste into Claude chat to add to calendar.');
+    }).catch(() => {
+      alert(msg);
+    });
+  }
+}
+
+function makeDateObj(dateStr, timeStr) {
+  return new Date(dateStr + 'T' + timeStr);
+}
+
+function durationStr(start, end) {
+  const s = new Date('1970-01-01T' + start);
+  const e = new Date('1970-01-01T' + end);
+  const mins = (e - s) / 60000;
+  if (mins <= 0) return '?';
+  if (mins < 60) return mins + ' min';
+  const h = Math.floor(mins/60);
+  const m = mins % 60;
+  return h + 'h' + (m ? ' ' + m + 'm' : '');
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+function formatTime(t) {
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hr = h % 12 || 12;
+  return hr + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+}
+
+function monthLabel(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+}
+
+const events = [
+  { chamber:'LR', date:'2026-05-20', st:'11:30', et:'12:30', name:'Take A Break & Educate: Create Little Rock Young Professionals', cost:'Free', loc:'Zoom Webinar', reg:true, regNote:'Registration required' , url:'https://web.littlerockchamber.com/atlas/events-v4/register/769056'},
+  { chamber:'LR', date:'2026-05-21', st:'11:00', et:'11:15', name:'RIBBON CUTTING: Western Governors University', cost:'Free', loc:'200 E Markham St, Little Rock (Chamber - AT&T Auditorium)', reg:false , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-05-21', st:'14:00', et:'14:15', name:'RIBBON CUTTING: DARLN Donation', cost:'Free', loc:'200 E Markham St, Little Rock (Chamber - AT&T Auditorium)', reg:false , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-05-26', st:'11:00', et:'11:15', name:'RIBBON CUTTING: J. Starling Strategy & Financial Consulting Firm', cost:'Free', loc:'200 E Markham St, Little Rock (Chamber - AT&T Auditorium)', reg:false , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-05-29', st:'12:00', et:'13:00', name:'Final Friday with 400 West Capitol (Members Only)', cost:'Free', loc:'400 W Capitol Ave, Little Rock', reg:true, regNote:'Members only; registration required' , url:'https://web.littlerockchamber.com/atlas/events/final-friday-hosted-by-400-w-capitol-769034/details'},
+  { chamber:'LR', date:'2026-06-04', st:'11:30', et:'13:00', name:'Cultivate Workshop: Bank On It', cost:'Free', loc:'3805 W 12th St, Little Rock (Willie Hinton Neighborhood Resource Center)', reg:true, regNote:'Registration required; lunch included; free' , url:'https://web.littlerockchamber.com/atlas/events/cultivate-workshop-bank-on-it-769055/details'},
+  { chamber:'LR', date:'2026-06-04', st:'17:30', et:'19:30', name:'Land in the Rock Kickoff Party at First Orion', cost:'Free', loc:'520 Main St, Little Rock (First Orion)', reg:true, regNote:'Registration required' , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-06-22', st:'12:00', et:'13:00', name:'Land in the Rock: Arkansas 250 Conversation with Rex Nelson', cost:'Free', loc:'100 S Rock St, Little Rock', reg:true, regNote:'Registration required' , url:'https://web.littlerockchamber.com/atlas/events/arkansas-at-america-s-250th-769060/details'},
+  { chamber:'LR', date:'2026-06-24', st:'18:00', et:'20:00', name:'Land in the Rock: Arkansas Travelers Baseball Game', cost:'Free', loc:'400 W Broadway St, North Little Rock (Dickey-Stephens Park)', reg:true, regNote:'Registration required' , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-06-30', st:'14:00', et:'14:15', name:'RIBBON CUTTING: Pine Haven Venue', cost:'Free', loc:'20195 Congo Ferndale Rd, Little Rock', reg:false , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-07-15', st:'12:00', et:'13:30', name:'Land in the Rock: Professional Development Lunch with Skip Rutherford', cost:'Free', loc:'119 Main St, Little Rock', reg:true, regNote:'Registration required' , url:'https://web.littlerockchamber.com/atlas/events/create-little-rock-professional-development-lunch-with-skip-rutherford-769058/details'},
+  { chamber:'LR', date:'2026-07-16', st:'12:00', et:'16:00', name:'Bowling for Business (presented by Mainstream Technologies)', loc:'2616 S Shackleford Rd, Little Rock', reg:true, regNote:'Registration required' , url:'https://web.littlerockchamber.com/atlas/events/bowling-for-business-presented-by-mainstream-technologies-768868/details'},
+  { chamber:'LR', date:'2026-07-16', st:'12:00', et:'13:30', name:'Land in the Rock: Rock Town Distillery Tour & Tasting', cost:'$10', loc:'1201 Main St, Little Rock (Rock Town Distillery)', reg:true, regNote:'Registration required; $10 for CLR members' , url:'https://web.littlerockchamber.com/atlas/events/create-little-rock-professional-development-lunch-with-skip-rutherford-769058/details'},
+  { chamber:'LR', date:'2026-07-30', st:'17:30', et:'19:30', name:'Land in the Rock: River Cookout', cost:'Free', loc:'1726 E 2nd St, Little Rock (Rock City Yacht Club)', reg:true, regNote:'Registration required' , url:'https://www.littlerockchamber.com/events'},
+  { chamber:'LR', date:'2026-08-11', st:'07:30', et:'08:30', name:'The Morning Grind (Small Business Coffee Networking)', loc:'200 E Markham St, Little Rock (Chamber)', reg:true, regNote:'Registration required' },
+  { chamber:'LR', date:'2026-08-11', st:'08:30', et:'09:30', name:'Chamber 101: New Member Orientation (Q3)', cost:'Free', loc:'200 E Markham St, Little Rock (Chamber)', reg:true, regNote:'Free; registration required' , url:'https://web.littlerockchamber.com/atlas/events/chamber-101-new-member-orientation-3rd-quarter-768862/details'},
+  { chamber:'LR', date:'2026-09-24', st:'11:30', et:'13:00', name:'44th Annual MED Week Awards Luncheon', loc:'501 W 9th St, Little Rock', reg:true, regNote:'Ticket purchase required; space limited' , url:'https://web.littlerockchamber.com/atlas/events/44th-annual-minority-business-awards-luncheon-768869/details'},
+  { chamber:'LR', date:'2026-10-20', st:'07:30', et:'08:30', name:'The Morning Grind (Small Business Coffee Networking)', loc:'200 E Markham St, Little Rock (Chamber)', reg:true, regNote:'Registration required' },
+  { chamber:'LR', date:'2026-10-20', st:'08:30', et:'09:30', name:'Chamber 101: New Member Orientation (Q4)', cost:'Free', loc:'200 E Markham St, Little Rock (Chamber)', reg:true, regNote:'Free; registration required' , url:'https://web.littlerockchamber.com/atlas/events/chamber-101-new-member-orientation-4th-quarter-768863/details'},
+  // Power Hour Leads Group – 1st & 3rd Wednesday, 8:30–9:30 AM
+  { chamber:'NLR', date:'2026-05-27', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-06-03', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-06-17', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-07-01', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-07-15', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-08-05', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-08-19', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-09-02', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-09-16', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-10-07', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-10-21', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-11-04', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-11-18', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-12-02', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  { chamber:'NLR', date:'2026-12-16', st:'08:30', et:'09:30', name:'Power Hour Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Power-Hour-Leads-Group-1838/details' },
+  // Northern Stars Leads Group – 1st & 3rd Tuesday, 8:30–9:30 AM
+  { chamber:'NLR', date:'2026-06-02', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-06-16', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-07-07', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-07-21', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-08-04', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-08-18', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-09-01', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-09-15', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-10-06', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-10-20', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-11-03', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-11-17', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-12-01', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-12-15', st:'08:30', et:'09:30', name:'Northern Stars Leads Group', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:false, url:'https://web.nlrchamber.org/events/Northern-Stars-Leads-Group-1835/details' },
+  { chamber:'NLR', date:'2026-05-28', st:'08:30', et:'10:00', name:'North Little Rock Public Safety Awards', loc:'North Little Rock Event Center, 120 Main Street, North Little Rock', reg:true, regNote:'Registration likely required', url:'https://web.nlrchamber.org/events/North-Little-Rock-Public-Safety-Awards-1823/details' },
+  { chamber:'NLR', date:'2026-06-09', st:'11:00', et:'12:00', name:'Grand Opening: Central Fire Station (13th & Main)', cost:'Free', loc:'13th & Main Streets, North Little Rock', reg:false, url:'https://www.facebook.com/TheNLRChamber/' },
+  { chamber:'NLR', date:'2026-06-16', st:'11:30', et:'13:00', name:'Commercial Real Estate Luncheon', cost:'$20', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:true, regNote:'$20 member / $25 non-member; registration required', url:'https://web.nlrchamber.org/events/Commercial-Real-Estate-Luncheon-1840/details' },
+  { chamber:'NLR', date:'2026-06-17', st:'11:30', et:'13:00', name:'Lunch & Learn: Smart Business – Understanding AI in Today\'s Workplace', cost:'$15', loc:'North Little Rock Chamber of Commerce, 100 Main St, North Little Rock', reg:true, regNote:'$15 with lunch / free without; registration required', url:'https://web.nlrchamber.org/events/Lunch-Learn-Smart-Business-Understanding-AI-in-Todays-Workplace-1845/details' },
+  { chamber:'NLR', date:'2026-08-13', st:'09:00', et:'17:00', name:'Annual Golf Classic – Day 1', loc:'Burns Park Golf Course, 30 Championship Dr, North Little Rock', reg:true, regNote:'Registration required', url:'https://web.nlrchamber.org/events/Annual-Golf-Classic-DAY-1-1842/details' },
+  { chamber:'NLR', date:'2026-08-14', st:'08:00', et:'17:00', name:'Annual Golf Classic – Day 2', loc:'Burns Park Golf Course, 30 Championship Dr, North Little Rock', reg:true, regNote:'Registration required', url:'https://web.nlrchamber.org/events/Annual-Golf-Classic-DAY-2-1843/details' },
+  { chamber:'CON', date:'2026-05-28', st:'11:30', et:'13:30', name:'Outlook Conway', loc:'UCA Windgate Center for Fine & Performing Arts, Conway', reg:true, regNote:'Registration likely required', url:'https://conwaychamber.org/events/outlook-conway/' },
+  { chamber:'CON', date:'2026-06-12', st:'09:30', et:'16:30', name:'Bowling for Business', loc:'Conway Family Bowl, Conway', reg:true, regNote:'Registration required; 3 flights 9:30am-4:30pm', url:'https://conwaychamber.org/events/bowling-for-business/' },
+  { chamber:'CON', date:'2026-08-04', st:'18:30', et:'20:00', name:'UCA Purple Passion', cost:'Free', loc:'UCA Bears Practice Field, Conway', reg:false, url:'https://conwaychamber.org/events/uca-purple-passion/' },
+  { chamber:'CON', date:'2026-08-12', st:'07:00', et:'09:00', name:'Teacher Breakfast & Education Fair', loc:'Conway High School Cafeteria, 2300 Prince St, Conway', reg:true, regNote:'Registration required', url:'https://conwaychamber.org/events/teacher-breakfast-education-fair/' },
+  { chamber:'CON', date:'2026-09-11', st:'10:00', et:'15:30', name:'Baggo for Business', loc:'American Safeguard Insurance, 1165 Bob Courtway Dr, Conway', reg:true, regNote:'Registration required; morning & afternoon brackets', url:'https://conwaychamber.org/events/baggo-for-business/' },
+  { chamber:'CON', date:'2026-10-09', st:'17:00', et:'19:00', name:'Taste of Conway', cost:'$20', loc:'Conway Expo and Event Center, 2505 E. Oak St, Conway', reg:true, regNote:'Tickets $20; registration required', url:'https://conwaychamber.org/events/taste-of-conway/' },
+  { chamber:'CON', date:'2026-10-08', st:'08:30', et:'19:00', name:'Conway Business Expo', cost:'Free', loc:'Conway Expo and Event Center, 2505 E. Oak St, Conway', reg:true, regNote:'Free to attend; breakfast/lunch/Taste tickets separate', url:'https://conwaychamber.org/events/business-expo/' },
+  { chamber:'MAU', date:'2026-05-20', st:'16:00', et:'17:00', name:'Industrial Council Meeting', loc:'City Hall – Blue Room, Maumelle', reg:false, cost:'Free', url:'https://business.maumellechamber.com/event-calendar/Details/industrial-council-meetings-1590801?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-05-26', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587507?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-05-29', st:'17:30', et:'20:00', name:'Summer Kick-Off Event', loc:'Lake Willastein, Maumelle', reg:true, regNote:'Registration required', url:'https://business.maumellechamber.com/event-calendar/Details/summer-kick-off-event-1713111?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-02', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587443?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-09', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587496?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-12', st:'11:00', et:'17:00', name:'2026 Annual Golf Tournament', loc:'Country Club of Arkansas, 3 Country Club Circle, Maumelle', reg:true, regNote:'Registration required', url:'https://business.maumellechamber.com/event-calendar/Details/2026-annual-golf-tournament-1599503?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-16', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587471?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-23', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587508?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-06-23', st:'09:00', et:'17:00', name:'Your Chamber Connection (Jun 23–25)', cost:'Free', loc:'Jess Odom Community Center, 1100 Edgewood Dr, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/your-chamber-connection-1599504?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-07-07', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587444?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-07-14', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587497?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-07-21', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587472?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-07-28', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587509?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-07-30', st:'12:00', et:'17:00', name:'Bowling for Business', loc:'Millenium Bowl, 1100 Edgewood Dr, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/bowling-for-business-1599505?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-08-04', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587445?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-08-11', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587498?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-08-18', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587473?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-08-19', st:'16:00', et:'17:00', name:'Industrial Council Meeting', loc:'City Hall – Blue Room, Maumelle', reg:false, cost:'Free', url:'https://business.maumellechamber.com/event-calendar/Details/industrial-council-meetings-1590802?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-08-25', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587510?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-01', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587446?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-08', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587499?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-15', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587474?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-22', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587511?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-23', st:'09:00', et:'14:00', name:'Career Connect', cost:'Free', loc:'Jess Odom Community Center, 1100 Edgewood Dr, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/career-connect-1599507?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-09-24', st:'17:00', et:'19:00', name:'Business After Hours (Fish Fry)', cost:'Free', loc:'Lake Willastein, Lake Willastein Dr, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/business-after-hours-fish-fry-1599508?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-10-06', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587447?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-10-13', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587500?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-10-20', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587475?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-10-27', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587512?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-11-03', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587448?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-11-10', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587501?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-11-17', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587476?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-11-18', st:'16:00', et:'17:00', name:'Industrial Council Meeting', loc:'City Hall – Blue Room, Maumelle', reg:false, cost:'Free', url:'https://business.maumellechamber.com/event-calendar/Details/industrial-council-meetings-1590803?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-11-24', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587513?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-12-01', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587449?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-12-08', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587502?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-12-15', st:'08:30', et:'09:30', name:'Pipeline – Maumelle Business Builders (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-maumelle-business-builders-1587477?sourceTypeId=Website' },
+  { chamber:'MAU', date:'2026-12-22', st:'08:30', et:'09:30', name:'Pipeline TEAM Maumelle (Leads Group)', loc:'Maumelle Chamber, 115 Audubon Dr Ste 14, Maumelle', reg:false, url:'https://business.maumellechamber.com/event-calendar/Details/pipeline-team-maumelle-1587514?sourceTypeId=Website' },
+  // ═══════════════════════════════════
+  // SHERWOOD CHAMBER
+  // ═══════════════════════════════════
+  { chamber:'SHR', date:'2026-05-21', st:'18:00', et:'20:00', name:'RIBBON CUTTING: Vendorfest', cost:'Free', loc:'City Hall Park, 2199 E Kiehl Ave, Sherwood', reg:false, url:'https://business.sherwoodchamber.net/events/details/ribbon-cutting-for-vendorfest-5919' },
+  { chamber:'SHR', date:'2026-06-02', st:'12:00', et:'13:00', name:'RIBBON CUTTING: Daisy Studio LLC', cost:'Free', loc:'8000 AR-107 Suite 8, Sherwood', reg:false, url:'https://business.sherwoodchamber.net/events/details/ribbon-cutting-for-daisy-studio-llc-5920' },
+  { chamber:'SHR', date:'2026-06-04', st:'11:30', et:'13:00', name:'Lunch & Link Speed Networking Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'$18 member / $25 non-member; registration required', cost:'$18', url:'https://business.sherwoodchamber.net/events/details/lunch-link-speed-networking-luncheon-3330' },
+  { chamber:'SHR', date:'2026-08-06', st:'11:30', et:'13:00', name:'Lunch & Link Speed Networking Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'$18 member / $25 non-member; registration required', cost:'$18', url:'https://business.sherwoodchamber.net/events/details/lunch-link-speed-networking-luncheon-08-06-2026-3332' },
+  { chamber:'SHR', date:'2026-09-03', st:'11:30', et:'13:00', name:'Lunch & Link Speed Networking Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'$18 member / $25 non-member; registration required', cost:'$18', url:'https://business.sherwoodchamber.net/events/details/lunch-link-speed-networking-luncheon-09-03-2026-3333' },
+  { chamber:'SHR', date:'2026-09-24', st:'17:00', et:'19:00', name:'Fish Fry Fundraiser & Business Expo', cost:'$20', loc:'Sherwood Forest, 1111 Maryland Ave, Sherwood', reg:true, regNote:'$20/ticket; children 4 and under free; registration required', url:'https://business.sherwoodchamber.net/events/details/fish-fry-fundraiser-business-expo-5841' },
+  { chamber:'SHR', date:'2026-10-01', st:'11:30', et:'13:00', name:'Meet the Candidates Forum Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'Registration required', url:'https://business.sherwoodchamber.net/events/details/meet-the-candidates-forum-luncheon-3334' },
+  { chamber:'SHR', date:'2026-10-16', st:'08:00', et:'18:00', name:'16th Annual Sherwood Chamber Golf Tournament', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'Registration required; two flights 8 AM and 1:30 PM', url:'https://business.sherwoodchamber.net/events/details/16th-annual-sherwood-chamber-golf-tournament-5842' },
+  { chamber:'SHR', date:'2026-11-05', st:'11:30', et:'13:00', name:'SheLeads Women in Business Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'Registration required', url:'https://business.sherwoodchamber.net/events/details/sheleads-women-in-business-luncheon-11-05-2026-3335' },
+  { chamber:'SHR', date:'2026-12-03', st:'11:30', et:'13:00', name:'SCC Christmas Chamber Awards Luncheon', loc:'The Greens at North Hills, 7400 Hwy 107, Sherwood', reg:true, regNote:'Registration required', url:'https://business.sherwoodchamber.net/events/details/scc-christmas-chamber-awards-luncheon-3336' },
+  { chamber:'EB', date:'2026-05-27', st:'11:30', et:'13:00', name:'4word Central Arkansas: Guest Speaker Mandy Richardson', loc:'Arkansas Press Association, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/4word-central-arkansas-guest-speaker-mandy-richardsoncgp1027-tickets-1986995071748' },
+  { chamber:'EB', date:'2026-06-09', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', cost:'Free', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-06-10', st:'14:30', et:'16:00', name:'Network Arkansas | NIA Impact AR Monthly Meeting', cost:'Free', loc:'321 Maple St, North Little Rock (Argenta Office Works)', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-arkansas-nia-impact-ar-monthly-meeting-tickets-1978970035649' },
+  { chamber:'EB', date:'2026-06-10', st:'18:00', et:'20:00', name:'Finance & Business Networking | Elevating Your Potential', cost:'$17.99', loc:'Bark Bar & Grille, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/finance-and-business-networking-elevating-your-potential-little-rock-tickets-1983386051070' },
+  { chamber:'EB', date:'2026-06-10', st:'18:00', et:'20:00', name:'Engineering & Business Networking | Elevating Your Potential', cost:'$17.99', loc:'Bark Bar & Grille, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/engineering-and-business-networking-elevating-your-potential-little-rock-tickets-1983386086175' },
+  { chamber:'EB', date:'2026-06-10', st:'18:00', et:'20:00', name:'Politics & Business Networking | Elevating Your Potential', cost:'$17.99', loc:'Bark Bar & Grille, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/politics-and-business-networking-elevating-your-potential-little-rock-tickets-1983386071130' },
+  { chamber:'EB', date:'2026-06-18', st:'11:00', et:'13:00', name:'The Brunch Collective | Summer Bloom', loc:'Magnolia Title, 10310 W Markham St Ste 220, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/the-brunch-collective-summer-bloom-tickets-1989391244766' },
+  { chamber:'EB', date:'2026-06-30', st:'16:00', et:'17:30', name:'4word Central Arkansas: Service Event with Immerse', cost:'Free', loc:'Immerse, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/4word-central-arkansas-service-event-with-immerse-cgp1027-tickets-1986999245231' },
+  { chamber:'EB', date:'2026-07-14', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-07-22', st:'11:30', et:'13:00', name:'4word Central Arkansas: Luncheon', loc:'Arkansas Press Association, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/4word-central-arkansas-luncheon-cgp1027-tickets-1986996102832' },
+  { chamber:'EB', date:'2026-08-11', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-08-26', st:'11:30', et:'13:00', name:'4word Central Arkansas: Speaker Luncheon', loc:'Arkansas Press Association, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/4word-central-arkansas-speaker-luncheon-cgp1027-tickets-1987000981424' },
+  { chamber:'EB', date:'2026-09-08', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-09-23', st:'11:30', et:'13:00', name:'4word Central Arkansas: Luncheon & Guest Speaker', loc:'Arkansas Press Association, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/4word-central-arkansas-luncheon-guest-speaker-cgp1027-tickets-1986996698614' },
+  { chamber:'EB', date:'2026-10-13', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-11-10', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-12-08', st:'15:30', et:'17:00', name:'Network AR | NIA Capital Connections Monthly Meeting', loc:'12615 Chenal Pkwy, Little Rock', reg:true, regNote:'Registration required', url:'https://www.eventbrite.com/e/network-ar-nia-capital-connections-monthly-meeting-tickets-1578665052669' },
+  { chamber:'EB', date:'2026-06-10', st:'18:00', et:'20:00', name:'General Business Networking - Little Rock', cost:'$17.99', loc:'Bark Bar & Grille, Little Rock', reg:true, regNote:'$17.99; registration required', url:'https://www.meetup.com/strive-networking/events/313402484/' },
+  { chamber:'EB', date:'2026-09-30', st:'08:00', et:'17:00', name:'Arkansas Manufacturing Showcase (Day 1)', loc:'Statehouse Convention Center, 101 E Markham St, Little Rock', reg:true, regNote:'Registration required', url:'https://arkansasstatechamber.com/events/' },
+  { chamber:'EB', date:'2026-10-01', st:'08:00', et:'17:00', name:'Arkansas Manufacturing Showcase (Day 2)', loc:'Statehouse Convention Center, 101 E Markham St, Little Rock', reg:true, regNote:'Registration required', url:'https://arkansasstatechamber.com/events/' },
+];
+
+events.sort((a,b) => a.date.localeCompare(b.date) || a.st.localeCompare(b.st));
+
+const tbody = document.getElementById('tbody');
+const countEl = document.getElementById('event-count');
+const noResults = document.getElementById('no-results');
+const regToggle = document.getElementById('reg-toggle');
+
+let activeChamber = 'ALL';
+let regOnly = false;
+let tbdOnly = false;
+
+function isTBD(ev) {
+  if (!ev.loc || !ev.loc.trim()) return true;
+  const l = ev.loc.toLowerCase();
+  return l.includes('tbd') || l.includes('unconfirmed') || l.includes('not listed') || l.includes('detail page unavailable') || l.includes('check ');
+}
+
+function buildTable() {
+  tbody.innerHTML = '';
+  let lastMonth = '';
+  let count = 0;
+
+  events.forEach((ev, i) => {
+    const month = monthLabel(ev.date);
+    const chamberMatch = activeChamber === 'ALL' || ev.chamber === activeChamber;
+    const regMatch = !regOnly || ev.reg;
+    const tbdMatch = !tbdOnly || isTBD(ev);
+    const visible = chamberMatch && regMatch && tbdMatch;
+
+    if (visible && month !== lastMonth) {
+      const mRow = document.createElement('tr');
+      mRow.className = 'month-header';
+      mRow.innerHTML = `<td colspan="9">${month}</td>`;
+      tbody.appendChild(mRow);
+      lastMonth = month;
+    }
+
+    const dur = durationStr(ev.st, ev.et);
+
+    const tr = document.createElement('tr');
+    tr.className = `chamber-${ev.chamber}${!visible ? ' hidden' : ''}`;
+    tr.innerHTML = `
+      <td><span class="chamber-dot"></span></td>
+      <td class="event-date">${formatDate(ev.date)}</td>
+      <td class="event-time">${formatTime(ev.st)}</td>
+      <td class="event-duration">${dur}</td>
+      <td class="event-name">${ev.url ? `<a href="${ev.url}" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(0,0,0,0.2);text-underline-offset:3px;">${ev.name}</a>` : ev.name}</td>
+      <td class="event-location">${isTBD(ev) ? `<span style="display:inline-block;padding:2px 7px;background:rgba(200,58,58,0.12);border:1px solid rgba(200,58,58,0.5);border-radius:10px;color:#c83a3a;font-size:11px;font-weight:500;">⚠ Needs Info</span> ${ev.loc || ''}` : ev.loc}</td>
+      <td>${ev.cost ? `<span style="font-size:12px;color:${ev.cost === 'Free' ? '#2ac871' : 'var(--text)'}">${ev.cost}</span>` : '<span style="font-size:11px;color:var(--muted)">—</span>'}</td>
+      <td>${ev.reg ? `<span class="badge-reg" title="${ev.regNote || ''}">✓ Required</span>` : '<span class="badge-free">Open</span>'}</td>
+      <td><button class="cal-link" onclick="addToCalendar(this)"
+        data-title="${ev.name.replace(/"/g,'&quot;')}"
+        data-date="${ev.date}"
+        data-st="${ev.st}"
+        data-et="${ev.et}"
+        data-chamber="${ev.chamber}"
+        data-loc="${ev.loc.replace(/"/g,'&quot;')}">📅 Add to Calendar</button></td>
+    `;
+    tbody.appendChild(tr);
+    if (visible) count++;
+  });
+
+  countEl.textContent = count;
+  noResults.style.display = count === 0 ? 'block' : 'none';
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeChamber = chip.dataset.chamber;
+    buildTable();
+  });
+});
+
+regToggle.addEventListener('click', () => {
+  regOnly = !regOnly;
+  regToggle.classList.toggle('on', regOnly);
+  buildTable();
+});
+
+const tbdToggle = document.getElementById('tbd-toggle');
+tbdToggle.addEventListener('click', () => {
+  tbdOnly = !tbdOnly;
+  tbdToggle.classList.toggle('on', tbdOnly);
+  buildTable();
+});
+
+buildTable();
+</script>
+</body>
+</html>
