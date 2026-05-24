@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/day2-reminder",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/day4-alert",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/preservice-alert",
+      "schedule": "0 18 * * *"
+    }
+  ]
+}
